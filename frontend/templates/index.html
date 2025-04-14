@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Advanced Fake News Detector</title>
+  <link rel="stylesheet" href="../static/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="logo">
+        <i class="fas fa-shield-alt"></i>
+      </div>
+      <div class="title-container">
+        <h1>Advanced News Authenticator</h1>
+        <p>AI-powered fake news detection for critical media literacy</p>
+      </div>
+    </header>
+
+    <div class="input-area">
+      <div class="instruction">
+        <i class="fas fa-info-circle"></i>
+        <span>Paste any news article or claim to verify its credibility</span>
+      </div>
+      <textarea id="newsInput" placeholder="Paste news article text here..."></textarea>
+      <button id="analyzeBtn">
+        <i class="fas fa-search"></i> Analyze Content
+      </button>
+    </div>
+
+    <div id="resultContainer" class="hidden">
+      <div class="result-card">
+        <div class="result-header">
+          <h2><i class="fas fa-chart-bar"></i> Analysis Result</h2>
+          <div class="confidence-container">
+            <span class="confidence-label">Confidence:</span>
+            <div class="confidence-meter">
+              <div id="confidenceBar" class="confidence-bar"></div>
+              <span id="confidenceValue">0%</span>
+            </div>
+          </div>
+        </div>
+        
+        <div id="predictionResult">
+          <i id="resultIcon" class="fas fa-question-circle"></i>
+          <span id="resultText">Waiting for analysis...</span>
+        </div>
+
+        <div class="red-flags" id="redFlagsContainer">
+          <h3><i class="fas fa-exclamation-triangle"></i> Warning Signs Detected:</h3>
+          <ul id="redFlagsList"></ul>
+        </div>
+        
+        <div class="helpful-tips">
+          <h3><i class="fas fa-lightbulb"></i> Fact Checking Tips</h3>
+          <ul>
+            <li>Always verify information from multiple reputable sources</li>
+            <li>Check the author's credentials and publication date</li>
+            <li>Be skeptical of sensational or emotional language</li>
+            <li>Look for supporting evidence and citations</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    
+    <div class="how-it-works">
+      <h2><i class="fas fa-cogs"></i> How It Works</h2>
+      <div class="features">
+        <div class="feature">
+          <div class="feature-icon">
+            <i class="fas fa-robot"></i>
+          </div>
+          <h3>AI Analysis</h3>
+          <p>Machine learning algorithms analyze text patterns common in fake news</p>
+        </div>
+        
+        <div class="feature">
+          <div class="feature-icon">
+            <i class="fas fa-flag"></i>
+          </div>
+          <h3>Red Flag Detection</h3>
+          <p>Identifies common misinformation patterns and dubious claims</p>
+        </div>
+        
+        <div class="feature">
+          <div class="feature-icon">
+            <i class="fas fa-percentage"></i>
+          </div>
+          <h3>Confidence Score</h3>
+          <p>Provides a reliability rating based on combined analysis factors</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <footer>
+    <div class="footer-content">
+      <p>Developed by Abhinay Selvakumar, Radheya A and Naveen Kanth</p>
+      <div class="footer-links">
+        <a href="#" title="About this tool"><i class="fas fa-info-circle"></i></a>
+        <a href="#" title="GitHub Repository"><i class="fab fa-github"></i></a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="../static/script.js"></script>
+</body>
+</html>
