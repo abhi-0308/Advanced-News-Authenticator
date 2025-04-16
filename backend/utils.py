@@ -86,7 +86,28 @@ class NewsClassifier:
             r'\b(instantly|immediately|quickly|within days|in days|in a week|in weeks).*(cure|heal|fix|solve).*(cancer|disease|illness)\b': 'quick_cure_claim',
             r'\b(cancer|disease).*(cure|cured|cures|healing|healed).*(herb|natural|plant|tea|extract)\b': 'miracle_natural_cure',
             r'\b(they don\'t want you to know|what they aren\'t telling you)\b': 'exclusive_knowledge',
-            r'\b(100%|guaranteed|always|never|definitely)\b': 'absolute_claim'
+            r'\b(100%|guaranteed|always|never|definitely)\b': 'absolute_claim',
+            # New patterns for common fake news types
+            r'\b(breaking news|breaking|just in|urgent|alert)\b': 'clickbait_headline',
+            r'\b(shocking|bombshell|explosive|you won\'t believe).*(discovery|news|revelation|evidence)\b': 'sensationalism',
+            r'\b(celebrities|hollywood|famous).*(secret|truth|scandal|shocking)\b': 'celebrity_gossip',
+            r'\b(government|politicians|officials).*(hiding|covering up|concealing|suppressing)\b': 'government_conspiracy',
+            r'\b(secret|hidden|shocking).*(agenda|plan|scheme)\b': 'hidden_agenda_claim',
+            r'\b(billionaire|wealthy|elite|illuminati).*(control|controlling|manipulate|manipulating)\b': 'elite_control_narrative',
+            r'\b(mainstream media|media|cnn|fox|msnbc).*(lie|lying|lies|fake|hiding|bias|biased)\b': 'media_distrust',
+            r'\b(election|voting|votes|ballot).*(rigged|stolen|fraud|cheating|illegal|fake)\b': 'election_fraud_claim',
+            r'\b(immigrants|foreigners|illegals).*(crime|criminal|stealing|taking|invading)\b': 'immigrant_fear',
+            r'\b(danger|dangerous|deadly|harmful).*(food|product|chemical|ingredient)\b': 'fear_mongering',
+            r'\b(doctors|medical industry|big pharma|pharmaceutical).*(hiding|suppressing|don\'t want you to know)\b': 'medical_conspiracy',
+            r'\b(anonymous|unnamed|inside).*(source|sources|insider|whistleblower)\b': 'vague_sourcing',
+            r'\b(this one|simple|easy|quick).*(trick|solution|fix|method)\b': 'miracle_solution',
+            r'\b(experts|scientists|researchers).*(shocked|surprised|amazed|puzzled)\b': 'expert_reaction',
+            r'\b(everyone|everybody|people).*(talking about|discussing|sharing)\b': 'social_proof',
+            r'\b(study|research).*(proves|confirmed|showed).*(controversial)\b': 'misrepresented_research',
+            r'\b(click|share|like|subscribe).*(before|now|today|immediately)\b': 'urgency_trigger',
+            r'\b(banks|fed|federal reserve|financial system).*(collapse|failing|corrupt|manipulation)\b': 'financial_conspiracy',
+            r'\b(government|they|officials).*(tracking|monitoring|spying|watching)\b': 'surveillance_claim',
+            r'\b(5g|wifi|radiation|electromagnetic).*(danger|harmful|cancer|disease)\b': 'technology_fear'
         }
         
         fake_score = 0
@@ -124,7 +145,12 @@ class NewsClassifier:
                 'miracle_cure_timeframe': 0.40,  # New pattern with high weight
                 'impossible_medical_claim': 0.35,  # New pattern
                 'quick_cure_claim': 0.40,  # New pattern with high weight
-                'miracle_natural_cure': 0.35  # New pattern
+                'miracle_natural_cure': 0.35,  # New pattern
+                # New critical claims
+                'election_fraud_claim': 0.35,
+                'medical_conspiracy': 0.30,
+                'technology_fear': 0.30,
+                'financial_conspiracy': 0.30
             }
             
             standard_fake_claims = {
@@ -132,9 +158,37 @@ class NewsClassifier:
                 'exaggerated_claim': 0.10,
                 'conspiracy_claim': 0.20,
                 'exclusive_knowledge': 0.15,
-                'absolute_claim': 0.10
+                'absolute_claim': 0.10,
+                # New standard claims
+                'clickbait_headline': 0.15,
+                'sensationalism': 0.20,
+                'celebrity_gossip': 0.15,
+                'government_conspiracy': 0.20,
+                'hidden_agenda_claim': 0.20,
+                'elite_control_narrative': 0.25,
+                'media_distrust': 0.20,
+                'immigrant_fear': 0.25,
+                'fear_mongering': 0.20,
+                'vague_sourcing': 0.15,
+                'miracle_solution': 0.20,
+                'expert_reaction': 0.10,
+                'social_proof': 0.10,
+                'misrepresented_research': 0.20,
+                'urgency_trigger': 0.10,
+                'surveillance_claim': 0.20
             }
             
+            # Count pattern frequency to escalate if multiple patterns appear
+            pattern_count = len(matches)
+            multiple_pattern_bonus = 0
+            if pattern_count >= 3:
+                multiple_pattern_bonus = 0.15
+                logger.info(f"Multiple pattern bonus applied: {multiple_pattern_bonus} for {pattern_count} patterns")
+            elif pattern_count == 2:
+                multiple_pattern_bonus = 0.05
+                logger.info(f"Multiple pattern bonus applied: {multiple_pattern_bonus} for {pattern_count} patterns")
+            
+            # Process all detected patterns
             for match in matches:
                 if match in critical_fake_claims:
                     manual_fake_score += critical_fake_claims[match]
@@ -143,6 +197,10 @@ class NewsClassifier:
                     manual_fake_score += standard_fake_claims[match]
                     logger.info(f"Standard fake claim detected: {match}")
             
+            # Apply multiple pattern bonus
+            manual_fake_score += multiple_pattern_bonus
+            
+            # Existing manual detection logic
             if re.search(r'flat earth|earth is flat|planet is flat|world is flat', original_text.lower()):
                 manual_fake_score += 0.35
                 if 'flat_earth_claim' not in matches:
@@ -206,6 +264,89 @@ class NewsClassifier:
                     matches.append('quick_cure_claim')
                 logger.info("Manual detection: Quick cancer cure claim detected")
             
+            # New manual detection patterns for common fake news types
+            if re.search(r'election.*(rigged|stolen|fraud)|voting.*(rigged|stolen|fraud)', original_text.lower()):
+                manual_fake_score += 0.35
+                if 'election_fraud_claim' not in matches:
+                    matches.append('election_fraud_claim')
+                logger.info("Manual detection: Election fraud claim detected")
+                
+            if re.search(r'(media|news|journalists).*(lying|lie|fake|biased)', original_text.lower()):
+                manual_fake_score += 0.20
+                if 'media_distrust' not in matches:
+                    matches.append('media_distrust')
+                logger.info("Manual detection: Media distrust claim detected")
+                
+            if re.search(r'(government|officials).*(watching|tracking|monitoring|spying)', original_text.lower()):
+                manual_fake_score += 0.20
+                if 'surveillance_claim' not in matches:
+                    matches.append('surveillance_claim')
+                logger.info("Manual detection: Surveillance claim detected")
+                
+            if re.search(r'(immigrants|foreigners|illegals).*(crime|criminals|stealing)', original_text.lower()):
+                manual_fake_score += 0.25
+                if 'immigrant_fear' not in matches:
+                    matches.append('immigrant_fear')
+                logger.info("Manual detection: Immigrant fear claim detected")
+                
+            if re.search(r'(elite|illuminati|wealthy|billionaire).*(control|plan|agenda)', original_text.lower()):
+                manual_fake_score += 0.25
+                if 'elite_control_narrative' not in matches:
+                    matches.append('elite_control_narrative')
+                logger.info("Manual detection: Elite control narrative detected")
+                
+            if re.search(r'(5g|wifi|radiation).*(dangers|harmful|cancer)', original_text.lower()):
+                manual_fake_score += 0.30
+                if 'technology_fear' not in matches:
+                    matches.append('technology_fear')
+                logger.info("Manual detection: Technology fear claim detected")
+                
+            if re.search(r'(breaking|urgent|alert).*(news|now|update)', original_text.lower()):
+                manual_fake_score += 0.15
+                if 'clickbait_headline' not in matches:
+                    matches.append('clickbait_headline')
+                logger.info("Manual detection: Clickbait headline detected")
+                
+            if re.search(r'(experts|scientists).*(shocked|surprised|amazed)', original_text.lower()):
+                manual_fake_score += 0.10
+                if 'expert_reaction' not in matches:
+                    matches.append('expert_reaction')
+                logger.info("Manual detection: Expert reaction claim detected")
+                
+            if re.search(r'(banks|financial system|economy).*(collapse|crash|failing)', original_text.lower()):
+                manual_fake_score += 0.30
+                if 'financial_conspiracy' not in matches:
+                    matches.append('financial_conspiracy')
+                logger.info("Manual detection: Financial conspiracy detected")
+                
+            if re.search(r'(source|insider|anonymous|whistleblower).*(reveal|confirmed|leak)', original_text.lower()):
+                manual_fake_score += 0.15
+                if 'vague_sourcing' not in matches:
+                    matches.append('vague_sourcing')
+                logger.info("Manual detection: Vague sourcing detected")
+                
+            if re.search(r'(shocking|unbelievable|bombshell).*(truth|reveal|evidence)', original_text.lower()):
+                manual_fake_score += 0.20
+                if 'sensationalism' not in matches:
+                    matches.append('sensationalism')
+                logger.info("Manual detection: Sensationalist language detected")
+                
+            # Text length check - extremely short news items are often clickbait
+            if len(cleaned.split()) < 20 and any(term in original_text.lower() for term in ['shocking', 'breaking', 'urgent', 'you won\'t believe']):
+                manual_fake_score += 0.15
+                if 'clickbait_headline' not in matches:
+                    matches.append('clickbait_headline')
+                logger.info("Manual detection: Short clickbait text detected")
+            
+            # Check for excessive punctuation which is common in fake news headlines
+            exclamation_count = original_text.count('!')
+            question_count = original_text.count('?')
+            if exclamation_count > 2 or question_count > 2:
+                manual_fake_score += 0.10
+                if 'sensationalism' not in matches:
+                    matches.append('sensationalism')
+                logger.info(f"Manual detection: Excessive punctuation detected ({exclamation_count} exclamations, {question_count} questions)")
+            
             sequence = self.tokenizer.texts_to_sequences([cleaned])
             padded = pad_sequences(sequence, maxlen=MAX_LEN, truncating='post')
             tensor = torch.tensor(padded, dtype=torch.long).to(self.device)
@@ -217,18 +358,32 @@ class NewsClassifier:
             
             logger.info(f"Original model probability: {model_prob}, Manual score: {manual_fake_score}, Adjusted: {adjusted_prob}")
             
-            if manual_fake_score >= 0.30:  # Strong evidence of fake news
+            # Enhanced threshold adjustments for more common fake news
+            if manual_fake_score >= 0.40:  # Very strong evidence of fake news
+                adjusted_prob = max(adjusted_prob, 0.90)  # Ensure at least 90% fake probability
+            elif manual_fake_score >= 0.30:  # Strong evidence of fake news
                 adjusted_prob = max(adjusted_prob, 0.80)  # Ensure at least 80% fake probability
-            elif manual_fake_score >= 0.15:  # Moderate evidence of fake news
+            elif manual_fake_score >= 0.20:  # Moderate evidence of fake news
+                adjusted_prob = max(adjusted_prob, 0.70)  # Ensure at least 70% fake probability
+            elif manual_fake_score >= 0.15:  # Some evidence of fake news
                 adjusted_prob = max(adjusted_prob, 0.65)  # Ensure at least 65% fake probability
+            elif manual_fake_score >= 0.10:  # Minimal evidence of fake news
+                adjusted_prob = max(adjusted_prob, 0.55)  # Ensure at least 55% fake probability
                 
+            # Scale up lower model probabilities if there's manual evidence
+            if model_prob < 0.3 and manual_fake_score > 0.15:
+                adjusted_prob = max(adjusted_prob, 0.3 + manual_fake_score)
+                logger.info(f"Low model probability boosted due to manual evidence")
+            
             return {
                 'prediction': 'Fake' if adjusted_prob > 0.5 else 'Real',
                 'confidence': max(adjusted_prob, 1-adjusted_prob),
                 'is_fake': adjusted_prob > 0.5,
                 'raw_probability': model_prob,
                 'adjusted_probability': adjusted_prob,
-                'detected_patterns': matches if matches else []
+                'detected_patterns': matches if matches else [],
+                'pattern_count': pattern_count,
+                'multiple_pattern_bonus': multiple_pattern_bonus
             }
         except Exception as e:
             logger.error(f"Prediction failed: {e}")
