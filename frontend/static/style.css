@@ -456,3 +456,41 @@ footer {
     font-size: 24px;
   }
 }
+
+/* Add these styles to your existing CSS */
+
+:root {
+  /* Keep your existing variables */
+  --particle-color-1: #3a4cb9;
+  --particle-color-2: #6d7adc;
+  --particle-color-3: #f0f2ff;
+}
+
+body {
+  /* Update your existing body styles */
+  background-color: #f9faff;
+  /* Add gradient background to enhance particle effect */
+  background: linear-gradient(135deg, #f9faff 0%, #eef1ff 100%);
+}
+
+/* Enhanced card styling to work better with particle background */
+.input-area, .result-card, .feature {
+  background-color: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(5px);
+  border: 1px solid rgba(240, 242, 255, 0.8);
+}
+
+/* Add subtle hover effects for better interaction */
+.input-area:hover, .result-card:hover {
+  box-shadow: 0 8px 16px rgba(58, 76, 185, 0.15);
+  transition: var(--transition);
+}
+
+#particleCanvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+}
