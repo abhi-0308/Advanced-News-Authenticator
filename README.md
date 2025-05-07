@@ -10,16 +10,6 @@
 * Evaluates models using accuracy, confusion matrix, and classification report
 * Interactive Jupyter Notebook for analysis and experimentation
 
-## Project Structure
-
-```
-Advanced-News-Authenticator/
-├── fake-news-detection.ipynb     # Jupyter Notebook with model code
-├── news.csv                      # Dataset of news articles
-├── requirements.txt              # List of required Python libraries
-└── README.md                     # Project documentation
-```
-
 ## Models Used
 
 * Logistic Regression
@@ -47,8 +37,9 @@ The project uses a dataset named `fake.csv` and `true.csv` which contains labele
 ## Requirements
 
 * Python 3.x
-* pandas
-* numpy
+* FLASK
+* HTML/CSS
+* JavaScript
 
 ## Future Improvements
 
